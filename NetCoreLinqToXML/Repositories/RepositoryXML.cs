@@ -70,7 +70,8 @@ namespace NetCoreLinqToXML.Repositories
             if (consulta.Count() == 0)
             {
                 return null;
-            } else
+            }
+            else
             {
                 XElement tag = consulta.FirstOrDefault();
                 Cliente cliente = new Cliente();
@@ -83,7 +84,7 @@ namespace NetCoreLinqToXML.Repositories
             }
         }
 
-        private XElement FindXMLCliente (string id)
+        private XElement FindXMLCliente(string id)
         {
             var consulta = from datos in this.documentClientes.Descendants("CLIENTE")
                            where datos.Element("IDCLIENTE").Value == id
@@ -138,6 +139,23 @@ namespace NetCoreLinqToXML.Repositories
             return peliculas;
         }
 
+        public Pelicula FindPelicula(int idpelicula)
+        {
+            string path = this.helper.MapPath("peliculas.xml", Folders.Documents);
+            XDocument document = XDocument.Load(path);
+            var consulta = from datos in document.Descendants("pelicula")
+                           where datos.Attribute("idpelicula").Value == idpelicula.ToString()
+                           select datos;
+            XElement tag = consulta.FirstOrDefault();
+            Pelicula peli = new Pelicula();
+            peli.IdPelicula = int.Parse(tag.Attribute("idpelicula").Value);
+            peli.Titulo = tag.Element("titulo").Value;
+            peli.TituloOriginal = tag.Element("titulooriginal").Value;
+            peli.Descripcion = tag.Element("descripcion").Value;
+            peli.Poster = tag.Element("poster").Value;
+            return peli;
+        }
+
         public List<EscenaPelicula> GetEscenas(int idpelicula)
         {
             List<EscenaPelicula> escenas = new List<EscenaPelicula>();
@@ -154,6 +172,14 @@ namespace NetCoreLinqToXML.Repositories
                 escenas.Add(escena);
             }
             return escenas;
+        }
+
+        public EscenaPelicula GetEscenaPelicula(int idpelicula, int posicion, ref int numeroEscenas)
+        {
+            List<EscenaPelicula> escenas = this.GetEscenas(idpelicula);
+            numeroEscenas = escenas.Count();
+            EscenaPelicula escena = escenas.Skip(posicion).Take(1).FirstOrDefault();
+            return escena;
         }
     }
 }
